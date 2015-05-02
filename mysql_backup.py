@@ -34,14 +34,14 @@ class Backup():
         login_info["username"] = config.get("client", "user")
         login_info["password"] = config.get("client", "password")
         login_info["host"] = config.get("client", "host")
-        return login_info
+        self.login_info = login_info
 
-    def get_list_of_databases(self, login_info):
+    def get_list_of_databases(self):
         database_list_command = ("mysql -u %s -p%s -h %s --silent -N" + \
                                  " -e 'show databases'") % (
-                                 login_info["username"],
-                                 login_info["password"],
-                                 login_info["host"])
+                                 self.login_info["username"],
+                                 self.login_info["password"],
+                                 self.login_info["host"])
         f = os.popen(database_list_command, 'r')
         database_list = f.readlines()
         return database_list
@@ -53,7 +53,7 @@ class Backup():
         filename = (path + "%s-%s.sql") % (database, filestamp)
         return filename
 
-    def backup_databases(self, login_info, database_list, backuppath):
+    def backup_databases(self, database_list, backuppath):
             for database in database_list:
                 database = database.strip()
                 if database not in ["information_schema",
@@ -68,8 +68,8 @@ class Backup():
                         raise OSError
                     os.popen(("mysqldump -u %s -p%s -h %s -e --opt -c %s" + \
                               " --ignore-table=mysql.event | " + \
-                              "gzip -c > %s.gz") % (login_info["username"],
-                                                    login_info["password"],
-                                                    login_info["host"],
+                              "gzip -c > %s.gz") % (self.login_info["username"],
+                                                    self.login_info["password"],
+                                                    self.login_info["host"],
                                                     database,
                                                     filename))
