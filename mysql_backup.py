@@ -93,3 +93,17 @@ class Backup():
                                                 self.login_info["host"],
                                                 database,
                                                 filename))
+
+def backup():
+    config = ConfigParser.ConfigParser()
+    config.read("config.txt")
+    configpath = config.get("backup", "configpath")
+    backuppath = config.get("backup", "backuppath")
+    mb = Backup(configpath=configpath,
+                backuppath=backuppath)
+    mb.read_config()
+    mb.read_list_of_databases()
+    mb.backup_databases()
+
+if __name__ == "main":
+    backup()

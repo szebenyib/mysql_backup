@@ -1,10 +1,14 @@
 import time
 import os
+import ConfigParser
+import imp
 import unittest
 import mysql_backup
 
-configpath = "/etc/mysql/debian.cnf"
-backuppath = "/mnt/user_szebenyib/backups/mysql"
+config = ConfigParser.ConfigParser()
+config.read("config.txt")
+configpath = config.get("backup", "configpath")
+backuppath = config.get("backup", "backuppath")
 
 class TestBackupCreation(unittest.TestCase):
 
@@ -48,7 +52,6 @@ class TestBackupMethods(unittest.TestCase):
         del self.configpath
         del self.backuppath
 
-    
     def test_read_config_permissions(self):
         with self.assertRaises(OSError):
             os.stat(self.configpath + "ASDASDASD.LLLL")
@@ -112,6 +115,9 @@ class TestBackupMethods(unittest.TestCase):
             self.fail("No mysql backup created as of today: " + \
                       filename + " does not exist at: " + \
                       self.backuppath)
+
+    def test_running_backup(self):
+        mysql_backup.backup()
 
 if __name__ == "main":
     unittest.main()
