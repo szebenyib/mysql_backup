@@ -28,9 +28,10 @@ class TestBackupMethods(unittest.TestCase):
         del self.path
         del self.backuppath
 
-    def test_get_filestamp(self):
-        self.assertIsNotNone(self.mb.get_filestamp())
-        self.assertEqual(self.mb.get_filestamp(), time.strftime("%Y-%m-%d"))
+    def test_set_filestamp(self):
+        self.mb.set_filestamp()
+        self.assertIsNotNone(self.mb.filestamp)
+        self.assertEqual(self.mb.filestamp, time.strftime("%Y-%m-%d"))
 
     def test_read_config_permissions(self):
         with self.assertRaises(OSError):
@@ -72,7 +73,7 @@ class TestBackupMethods(unittest.TestCase):
         login_info = self.mb.read_config(config_location=self.path)
         list_of_databases = self.mb.get_list_of_databases(login_info)
         database = "a"
-        filestamp = self.mb.get_filestamp()
+        filestamp = self.mb.filestamp
         self.assertIsInstance(self.mb.get_filename_of_backup(self.path,
                                                              database,
                                                              filestamp), str)
@@ -80,7 +81,7 @@ class TestBackupMethods(unittest.TestCase):
     def test_get_filename_trailing_slash(self):
         login_info = self.mb.read_config(config_location=self.path)
         list_of_databases = self.mb.get_list_of_databases(login_info)
-        filestamp = self.mb.get_filestamp()
+        filestamp = self.mb.filestamp
         database = "a"
         bad_backuppath = "/mnt/user_szebenyib/backups/mysql"
         fname_w_trailing_slash = self.mb.get_filename_of_backup(bad_backuppath,
@@ -96,7 +97,7 @@ class TestBackupMethods(unittest.TestCase):
     def test_backup_databases_creates_file(self):
         login_info = self.mb.read_config(config_location=self.path)
         list_of_databases = self.mb.get_list_of_databases(login_info)
-        filestamp = self.mb.get_filestamp()
+        filestamp = self.mb.filestamp
         databases = self.mb.get_list_of_databases(login_info=login_info)
         self.mb.backup_databases(login_info=login_info,
                             database_list=databases,

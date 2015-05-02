@@ -6,11 +6,16 @@ import ConfigParser
 import unittest
 
 class Backup():
-    def get_filestamp(self):
+    def __init__(self):
+            self.filestamp = None
+            self.login_info = None
+            self.database_list = None
+
+    def set_filestamp(self):
         """Obtains a date stamp for the files from the date.
         @return: a string YYYY-MM-DD
         """
-        return time.strftime("%Y-%m-%d")
+        self.filestamp = time.strftime("%Y-%m-%d")
 
     def read_config(self, config_location="/etc/mysql/debian.cnf"):
         """Reads the databse config from its location. The default
@@ -51,12 +56,11 @@ class Backup():
     def backup_databases(self, login_info, database_list, backuppath):
             for database in database_list:
                 database = database.strip()
-                filestamp = self.get_filestamp()
                 if database not in ["information_schema",
                                     "performance_schema"]:
                     filename = self.get_filename_of_backup(path=backuppath,
                                                            database=database,
-                                                           filestamp=filestamp)
+                                                           filestamp=self.filestamp)
                     try:
                         os.stat(backuppath)
                     except OSError:
