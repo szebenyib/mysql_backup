@@ -65,21 +65,21 @@ class TestBackupMethods(unittest.TestCase):
         self.assertTrue("password" in keys)
         self.assertTrue("host" in keys)
 
-    def test_get_list_of_databases_returns_a_list(self):
+    def test_read_list_of_databases_returns_a_list(self):
         self.mb.read_config()
         login_info = self.mb.login_info
-        self.assertIsInstance(self.mb.get_list_of_databases(), list)
+        self.mb.read_list_of_databases()
+        self.assertIsInstance(self.mb.database_list, list)
 
-    def test_get_list_of_databases_not_empty(self):
+    def test_read_list_of_databases_not_empty(self):
         self.mb.read_config()
         login_info = self.mb.login_info
-        list_of_databases = self.mb.get_list_of_databases()
-        self.assertTrue(len(list_of_databases) > 0)
+        self.mb.read_list_of_databases()
+        self.assertTrue(len(self.mb.database_list) > 0)
 
     def test_get_filename_of_backup_is_string(self):
         self.mb.read_config()
         login_info = self.mb.login_info
-        list_of_databases = self.mb.get_list_of_databases()
         database = "a"
         filestamp = self.mb.filestamp
         self.assertIsInstance(self.mb.get_filename_of_backup(self.configpath,
@@ -89,7 +89,7 @@ class TestBackupMethods(unittest.TestCase):
     def test_get_filename_trailing_slash(self):
         self.mb.read_config()
         login_info = self.mb.login_info
-        list_of_databases = self.mb.get_list_of_databases()
+        self.mb.read_list_of_databases()
         filestamp = self.mb.filestamp
         database = "a"
         bad_backuppath = "/mnt/user_szebenyib/backups/mysql"
@@ -106,11 +106,9 @@ class TestBackupMethods(unittest.TestCase):
     def test_backup_databases_creates_file(self):
         self.mb.read_config()
         login_info = self.mb.login_info
-        list_of_databases = self.mb.get_list_of_databases()
+        self.mb.read_list_of_databases()
         filestamp = self.mb.filestamp
-        databases = self.mb.get_list_of_databases()
-        self.mb.backup_databases(database_list=databases,
-                                 backuppath=self.backuppath)
+        self.mb.backup_databases(backuppath=self.backuppath)
         try:
             filename = self.mb.get_filename_of_backup(path=self.backuppath,
                                                  database="mysql",

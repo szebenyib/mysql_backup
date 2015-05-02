@@ -39,7 +39,7 @@ class Backup():
         login_info["host"] = config.get("client", "host")
         self.login_info = login_info
 
-    def get_list_of_databases(self):
+    def read_list_of_databases(self):
         database_list_command = ("mysql -u %s -p%s -h %s --silent -N" + \
                                  " -e 'show databases'") % (
                                  self.login_info["username"],
@@ -47,7 +47,7 @@ class Backup():
                                  self.login_info["host"])
         f = os.popen(database_list_command, 'r')
         database_list = f.readlines()
-        return database_list
+        self.database_list = database_list
 
     def get_filename_of_backup(self, path, database, filestamp):
         last_char_of_path = path[len(path) - 1]
@@ -56,8 +56,8 @@ class Backup():
         filename = (path + "%s-%s.sql") % (database, filestamp)
         return filename
 
-    def backup_databases(self, database_list, backuppath):
-            for database in database_list:
+    def backup_databases(self, backuppath):
+            for database in self.database_list:
                 database = database.strip()
                 if database not in ["information_schema",
                                     "performance_schema"]:
