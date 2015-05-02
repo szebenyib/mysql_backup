@@ -1,3 +1,5 @@
 [backup]
 configpath = /etc/mysql/debian.cnf
 backuppath = /mnt/user_szebenyib/backups/mysql
+[delete]
+numbertokeep = 5

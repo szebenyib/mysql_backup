@@ -8,7 +8,8 @@ import unittest
 class Backup():
     def __init__(self,
                  configpath,
-                 backuppath):
+                 backuppath,
+                 numbertokeep):
         """Creates a Backup instance with the configpath that holds the
         credentials to access mysql. It is generally found under:
         "/etc/mysql/debian.cnf" on debian based systems including Ubuntu.
@@ -19,6 +20,7 @@ class Backup():
         self.check_path(self.configpath)
         self.backuppath = self.correct_path(backuppath)
         self.check_path(self.backuppath)
+        self.numbertokeep = numbertokeep
         self.filestamp = time.strftime("%Y-%m-%d")
         self.login_info = None
         self.database_list = None
@@ -93,14 +95,20 @@ class Backup():
                                                 self.login_info["host"],
                                                 database,
                                                 filename))
+    def delete_old_backups(self):
+        """Deletes the old backups, keeping only as many as what has been
+        specified in the config's numbertokeep parameter."""
+        pass
 
 def backup():
     config = ConfigParser.ConfigParser()
     config.read("config.txt")
     configpath = config.get("backup", "configpath")
     backuppath = config.get("backup", "backuppath")
+    numbertokeep = config.get("delete", "numbertokeep")
     mb = Backup(configpath=configpath,
-                backuppath=backuppath)
+                backuppath=backuppath,
+                numbertokeep=numbertokeep)
     mb.read_config()
     mb.read_list_of_databases()
     mb.backup_databases()
