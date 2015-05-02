@@ -19,7 +19,7 @@ class Backup():
         self.check_path(self.configpath)
         self.backuppath = self.correct_path(backuppath)
         self.check_path(self.backuppath)
-        self.filestamp = None
+        self.filestamp = time.strftime("%Y-%m-%d")
         self.login_info = None
         self.database_list = None
 
@@ -45,12 +45,6 @@ class Backup():
             path = path
         return path
 
-    def set_filestamp(self):
-        """Obtains a date stamp for the files from the date.
-        @return: a string YYYY-MM-DD
-        """
-        self.filestamp = time.strftime("%Y-%m-%d")
-
     def read_config(self):
         """Reads the databse config from its location.
         It sets up the login_info dictionary with "user", "password", "host".
@@ -64,6 +58,9 @@ class Backup():
         self.login_info = login_info
 
     def read_list_of_databases(self):
+        """Reads the list of databases via executing a mysql command and
+        fills the database list of the class.
+        """
         database_list_command = ("mysql -u %s -p%s -h %s --silent -N" + \
                                  " -e 'show databases'") % (
                                  self.login_info["username"],
@@ -74,20 +71,26 @@ class Backup():
         self.database_list = database_list
 
     def get_filename_of_backup(self, database, filestamp):
+        """Creates the filename for the given database to backup.
+        @return: the filename as string
+        """
         filename = (self.backuppath + "%s-%s.sql") % (database, filestamp)
         return filename
 
     def backup_databases(self, backuppath):
-            for database in self.database_list:
-                database = database.strip()
-                if database not in ["information_schema",
-                                    "performance_schema"]:
-                    filename = self.get_filename_of_backup(database=database,
-                                                           filestamp=self.filestamp)
-                    os.popen(("mysqldump -u %s -p%s -h %s -e --opt -c %s" + \
-                              " --ignore-table=mysql.event | " + \
-                              "gzip -c > %s.gz") % (self.login_info["username"],
-                                                    self.login_info["password"],
-                                                    self.login_info["host"],
-                                                    database,
-                                                    filename))
+        """Actually performs the database backup by dumping them from mysql
+        and writing them to a file at the same time.
+        """
+        for database in self.database_list:
+            database = database.strip()
+            if database not in ["information_schema",
+                                "performance_schema"]:
+                filename = self.get_filename_of_backup(database=database,
+                                                       filestamp=self.filestamp)
+                os.popen(("mysqldump -u %s -p%s -h %s -e --opt -c %s" + \
+                          " --ignore-table=mysql.event | " + \
+                          "gzip -c > %s.gz") % (self.login_info["username"],
+                                                self.login_info["password"],
+                                                self.login_info["host"],
+                                                database,
+                                                filename))

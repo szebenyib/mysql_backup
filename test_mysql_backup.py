@@ -21,16 +21,20 @@ class TestBackupCreation(unittest.TestCase):
                                  self.backuppath)
         self.assertIsInstance(mb, mysql_backup.Backup)
 
-    def test_create_class_bad_configpath(self):
+    def test_correct_path(self):
         with self.assertRaises(OSError):
                 mb = mysql_backup.Backup(self.configpath + "ASDASD.LLLL",
                                          self.backuppath)
 
-
-    def test_create_class_bad_configpath(self):
+    def test_check_path(self):
         with self.assertRaises(OSError):
                 mb = mysql_backup.Backup(self.configpath,
                                          self.backuppath + "ASDASD.LLLL")
+    def test_set_filestamp(self):
+        mb = mysql_backup.Backup(self.configpath,
+                                 self.backuppath)
+        self.assertIsNotNone(mb.filestamp)
+        self.assertEqual(mb.filestamp, time.strftime("%Y-%m-%d"))
 
 class TestBackupMethods(unittest.TestCase):
 
@@ -44,11 +48,7 @@ class TestBackupMethods(unittest.TestCase):
         del self.configpath
         del self.backuppath
 
-    def test_set_filestamp(self):
-        self.mb.set_filestamp()
-        self.assertIsNotNone(self.mb.filestamp)
-        self.assertEqual(self.mb.filestamp, time.strftime("%Y-%m-%d"))
-
+    
     def test_read_config_permissions(self):
         with self.assertRaises(OSError):
             os.stat(self.configpath + "ASDASDASD.LLLL")
