@@ -1,0 +1,3 @@
+[backup]
+configpath = /etc/mysql/debian.cnf
+backuppath = /mnt/user_szebenyib/backups/mysql
