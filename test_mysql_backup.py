@@ -3,98 +3,106 @@ import os
 import unittest
 import mysql_backup
 
-path = "/etc/mysql/debian.cnf"
 
-class MyTest(unittest.TestCase):
+class TestBackupCreation(unittest.TestCase):
+
+    def setUp(self):
+        self.path = "/etc/mysql/debian.cnf"
+        self.backuppath = "/mnt/user_szebenyib/backups/mysql"
+
+    def tearDown(self):
+        del self.path
+        del self.backuppath
 
     def test_create_class(self):
         mb = mysql_backup.Backup()
 
+class TestBackupMethods(unittest.TestCase):
+
+    def setUp(self):
+        self.path = "/etc/mysql/debian.cnf"
+        self.backuppath = "/mnt/user_szebenyib/backups/mysql"
+        self.mb = mysql_backup.Backup()
+
+    def tearDown(self):
+        del self.path
+        del self.backuppath
+
     def test_get_filestamp(self):
-        mb = mysql_backup.Backup()
-        self.assertIsNotNone(mb.get_filestamp())
-        self.assertEqual(mb.get_filestamp(), time.strftime("%Y-%m-%d"))
+        self.assertIsNotNone(self.mb.get_filestamp())
+        self.assertEqual(self.mb.get_filestamp(), time.strftime("%Y-%m-%d"))
 
     def test_read_config_permissions(self):
         with self.assertRaises(OSError):
-            os.stat(path + "ASDASDASD.LLLL")
+            os.stat(self.path + "ASDASDASD.LLLL")
         try:
-            os.stat(path)
+            os.stat(self.path)
         except:
             self.fail("Check the path variable in the test file," + \
-                      "it should be readable: " + path)
+                      "it should be readable: " + self.path)
 
     def test_read_config_returns_a_dictionary(self):
-        mb = mysql_backup.Backup()
-        self.assertIsInstance(mb.read_config(config_location=path), dict)
+        self.assertIsInstance(self.mb.read_config(config_location=self.path),
+                              dict)
 
     def test_read_config_read_default_location(self):
-        mb = mysql_backup.Backup()
-        login_info = mb.read_config(config_location=path)
+        login_info = self.mb.read_config(config_location=self.path)
         keys = login_info.keys()
         self.assertTrue("username" in keys)
         self.assertTrue("password" in keys)
         self.assertTrue("host" in keys)
 
     def test_read_config_read_nondefault_location(self):
-        mb = mysql_backup.Backup()
-        login_info = mb.read_config(config_location=path)
+        login_info = self.mb.read_config(config_location=self.path)
         keys = login_info.keys()
         self.assertTrue("username" in keys)
         self.assertTrue("password" in keys)
         self.assertTrue("host" in keys)
 
     def test_get_list_of_databases_returns_a_list(self):
-        mb = mysql_backup.Backup()
-        login_info = mb.read_config(config_location=path)
-        self.assertIsInstance(mb.get_list_of_databases(login_info), list)
+        login_info = self.mb.read_config(config_location=self.path)
+        self.assertIsInstance(self.mb.get_list_of_databases(login_info), list)
 
     def test_get_list_of_databases_not_empty(self):
-        mb = mysql_backup.Backup()
-        login_info = mb.read_config(config_location=path)
-        list_of_databases = mb.get_list_of_databases(login_info)
+        login_info = self.mb.read_config(config_location=self.path)
+        list_of_databases = self.mb.get_list_of_databases(login_info)
         self.assertTrue(len(list_of_databases) > 0)
 
     def test_get_filename_of_backup_is_string(self):
-        mb = mysql_backup.Backup()
-        login_info = mb.read_config(config_location=path)
-        list_of_databases = mb.get_list_of_databases(login_info)
-        backuppath = "/mnt/user_szebenyib/backups/mysql/"
+        login_info = self.mb.read_config(config_location=self.path)
+        list_of_databases = self.mb.get_list_of_databases(login_info)
         database = "a"
-        filestamp = mb.get_filestamp()
-        self.assertIsInstance(mb.get_filename_of_backup(backuppath,
-                                                        database,
-                                                        filestamp), str)
+        filestamp = self.mb.get_filestamp()
+        self.assertIsInstance(self.mb.get_filename_of_backup(self.path,
+                                                             database,
+                                                             filestamp), str)
 
     def test_get_filename_trailing_slash(self):
-        mb = mysql_backup.Backup()
-        login_info = mb.read_config(config_location=path)
-        list_of_databases = mb.get_list_of_databases(login_info)
-        filestamp = mb.get_filestamp()
+        login_info = self.mb.read_config(config_location=self.path)
+        list_of_databases = self.mb.get_list_of_databases(login_info)
+        filestamp = self.mb.get_filestamp()
         database = "a"
-        backuppath = "/mnt/user_szebenyib/backups/mysql"
-        filename_w_trailing_slash = mb.get_filename_of_backup(backuppath,
+        bad_backuppath = "/mnt/user_szebenyib/backups/mysql"
+        fname_w_trailing_slash = self.mb.get_filename_of_backup(bad_backuppath,
                                                               database,
                                                               filestamp)
-        backuppath = "/mnt/user_szebenyib/backups/mysql/"
-        filename_wo_trailing_slash = mb.get_filename_of_backup(backuppath,
+        good_backuppath = self.backuppath
+        fname_wo_trailing_slash = self.mb.get_filename_of_backup(good_backuppath,
                                                                database,
                                                                filestamp)
-        self.assertEquals(filename_w_trailing_slash,
-                          filename_wo_trailing_slash)
+        self.assertEquals(fname_w_trailing_slash,
+                          fname_wo_trailing_slash)
 
     def test_backup_databases_creates_file(self):
-        mb = mysql_backup.Backup()
-        login_info = mb.read_config(config_location=path)
-        list_of_databases = mb.get_list_of_databases(login_info)
-        filestamp = mb.get_filestamp()
-        databases = mb.get_list_of_databases(login_info=login_info)
-        backuppath = "/mnt/user_szebenyib/backups/mysql/"
-        mb.backup_databases(login_info=login_info,
+        login_info = self.mb.read_config(config_location=self.path)
+        list_of_databases = self.mb.get_list_of_databases(login_info)
+        filestamp = self.mb.get_filestamp()
+        databases = self.mb.get_list_of_databases(login_info=login_info)
+        self.mb.backup_databases(login_info=login_info,
                             database_list=databases,
-                            backuppath=backuppath)
+                            backuppath=self.backuppath)
         try:
-            filename = mb.get_filename_of_backup(path=backuppath,
+            filename = self.mb.get_filename_of_backup(path=self.backuppath,
                                                  database="mysql",
                                                  filestamp = filestamp)
             filename = filename + ".gz"
@@ -102,7 +110,7 @@ class MyTest(unittest.TestCase):
         except:
             self.fail("No mysql backup created as of today: " + \
                       filename + " does not exist at: " + \
-                      backuppath)
+                      self.backuppath)
 
 if __name__ == "main":
     unittest.main()
