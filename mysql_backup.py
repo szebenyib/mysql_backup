@@ -7,15 +7,43 @@ import unittest
 
 class Backup():
     def __init__(self,
-                 configpath):
+                 configpath,
+                 backuppath):
         """Creates a Backup instance with the configpath that holds the
         credentials to access mysql. It is generally found under:
         "/etc/mysql/debian.cnf" on debian based systems including Ubuntu.
+        A backuppath is also required that specifies where the backup files
+        will be stored.
         """
         self.configpath = configpath
+        self.check_path(self.configpath)
+        self.backuppath = self.correct_path(backuppath)
+        self.check_path(self.backuppath)
         self.filestamp = None
         self.login_info = None
         self.database_list = None
+
+    def check_path(self, path):
+        """Checks if the path is accessible to the script.
+        @param path: the path to check
+        @raises OSError if the path is not accessible
+        """
+        try:
+            os.stat(path)
+        except OSError:
+            print("Path is not accessible for the script: " + path)
+            raise OSError
+
+    def correct_path(self, path):
+        """It adds trailing slashes if they are not present.
+        @param path: the path to check
+        """
+        last_char_of_path = path[len(path) - 1]
+        if last_char_of_path != "/":
+            path = path + "/"
+        else:
+            path = path
+        return path
 
     def set_filestamp(self):
         """Obtains a date stamp for the files from the date.
@@ -28,10 +56,6 @@ class Backup():
         It sets up the login_info dictionary with "user", "password", "host".
         """
         config = ConfigParser.ConfigParser()
-        try:
-            os.stat(self.configpath)
-        except OSError:
-            raise OSError
         config.read(self.configpath)
         login_info = dict()
         login_info["username"] = config.get("client", "user")
@@ -49,11 +73,8 @@ class Backup():
         database_list = f.readlines()
         self.database_list = database_list
 
-    def get_filename_of_backup(self, path, database, filestamp):
-        last_char_of_path = path[len(path) - 1]
-        if last_char_of_path != "/":
-            path = path + "/"
-        filename = (path + "%s-%s.sql") % (database, filestamp)
+    def get_filename_of_backup(self, database, filestamp):
+        filename = (self.backuppath + "%s-%s.sql") % (database, filestamp)
         return filename
 
     def backup_databases(self, backuppath):
@@ -61,14 +82,8 @@ class Backup():
                 database = database.strip()
                 if database not in ["information_schema",
                                     "performance_schema"]:
-                    filename = self.get_filename_of_backup(path=backuppath,
-                                                           database=database,
+                    filename = self.get_filename_of_backup(database=database,
                                                            filestamp=self.filestamp)
-                    try:
-                        os.stat(backuppath)
-                    except OSError:
-                        print "Not writable: " + filename
-                        raise OSError
                     os.popen(("mysqldump -u %s -p%s -h %s -e --opt -c %s" + \
                               " --ignore-table=mysql.event | " + \
                               "gzip -c > %s.gz") % (self.login_info["username"],

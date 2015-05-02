@@ -17,14 +17,28 @@ class TestBackupCreation(unittest.TestCase):
         del self.backuppath
 
     def test_create_class(self):
-        mb = mysql_backup.Backup(self.configpath)
+        mb = mysql_backup.Backup(self.configpath,
+                                 self.backuppath)
+        self.assertIsInstance(mb, mysql_backup.Backup)
+
+    def test_create_class_bad_configpath(self):
+        with self.assertRaises(OSError):
+                mb = mysql_backup.Backup(self.configpath + "ASDASD.LLLL",
+                                         self.backuppath)
+
+
+    def test_create_class_bad_configpath(self):
+        with self.assertRaises(OSError):
+                mb = mysql_backup.Backup(self.configpath,
+                                         self.backuppath + "ASDASD.LLLL")
 
 class TestBackupMethods(unittest.TestCase):
 
     def setUp(self):
         self.configpath = configpath
         self.backuppath = backuppath
-        self.mb = mysql_backup.Backup(self.configpath)
+        self.mb = mysql_backup.Backup(self.configpath,
+                                      self.backuppath)
 
     def tearDown(self):
         del self.configpath
@@ -82,26 +96,8 @@ class TestBackupMethods(unittest.TestCase):
         login_info = self.mb.login_info
         database = "a"
         filestamp = self.mb.filestamp
-        self.assertIsInstance(self.mb.get_filename_of_backup(self.configpath,
-                                                             database,
+        self.assertIsInstance(self.mb.get_filename_of_backup(database,
                                                              filestamp), str)
-
-    def test_get_filename_trailing_slash(self):
-        self.mb.read_config()
-        login_info = self.mb.login_info
-        self.mb.read_list_of_databases()
-        filestamp = self.mb.filestamp
-        database = "a"
-        bad_backuppath = "/mnt/user_szebenyib/backups/mysql"
-        fname_w_trailing_slash = self.mb.get_filename_of_backup(bad_backuppath,
-                                                              database,
-                                                              filestamp)
-        good_backuppath = self.backuppath
-        fname_wo_trailing_slash = self.mb.get_filename_of_backup(good_backuppath,
-                                                               database,
-                                                               filestamp)
-        self.assertEquals(fname_w_trailing_slash,
-                          fname_wo_trailing_slash)
 
     def test_backup_databases_creates_file(self):
         self.mb.read_config()
@@ -110,8 +106,7 @@ class TestBackupMethods(unittest.TestCase):
         filestamp = self.mb.filestamp
         self.mb.backup_databases(backuppath=self.backuppath)
         try:
-            filename = self.mb.get_filename_of_backup(path=self.backuppath,
-                                                 database="mysql",
+            filename = self.mb.get_filename_of_backup(database="mysql",
                                                  filestamp = filestamp)
             filename = filename + ".gz"
             os.stat(filename)
