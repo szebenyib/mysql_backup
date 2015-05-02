@@ -70,14 +70,14 @@ class Backup():
         database_list = f.readlines()
         self.database_list = database_list
 
-    def get_filename_of_backup(self, database, filestamp):
+    def get_filename_of_backup(self, database):
         """Creates the filename for the given database to backup.
         @return: the filename as string
         """
-        filename = (self.backuppath + "%s-%s.sql") % (database, filestamp)
+        filename = (self.backuppath + "%s-%s.sql") % (database, self.filestamp)
         return filename
 
-    def backup_databases(self, backuppath):
+    def backup_databases(self):
         """Actually performs the database backup by dumping them from mysql
         and writing them to a file at the same time.
         """
@@ -85,8 +85,7 @@ class Backup():
             database = database.strip()
             if database not in ["information_schema",
                                 "performance_schema"]:
-                filename = self.get_filename_of_backup(database=database,
-                                                       filestamp=self.filestamp)
+                filename = self.get_filename_of_backup(database=database)
                 os.popen(("mysqldump -u %s -p%s -h %s -e --opt -c %s" + \
                           " --ignore-table=mysql.event | " + \
                           "gzip -c > %s.gz") % (self.login_info["username"],

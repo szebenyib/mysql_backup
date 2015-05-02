@@ -96,18 +96,16 @@ class TestBackupMethods(unittest.TestCase):
         login_info = self.mb.login_info
         database = "a"
         filestamp = self.mb.filestamp
-        self.assertIsInstance(self.mb.get_filename_of_backup(database,
-                                                             filestamp), str)
+        self.assertIsInstance(self.mb.get_filename_of_backup(database), str)
 
     def test_backup_databases_creates_file(self):
         self.mb.read_config()
         login_info = self.mb.login_info
         self.mb.read_list_of_databases()
         filestamp = self.mb.filestamp
-        self.mb.backup_databases(backuppath=self.backuppath)
+        self.mb.backup_databases()
         try:
-            filename = self.mb.get_filename_of_backup(database="mysql",
-                                                 filestamp = filestamp)
+            filename = self.mb.get_filename_of_backup(database="mysql")
             filename = filename + ".gz"
             os.stat(filename)
         except:
