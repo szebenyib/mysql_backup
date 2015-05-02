@@ -17,14 +17,14 @@ class TestBackupCreation(unittest.TestCase):
         del self.backuppath
 
     def test_create_class(self):
-        mb = mysql_backup.Backup()
+        mb = mysql_backup.Backup(self.configpath)
 
 class TestBackupMethods(unittest.TestCase):
 
     def setUp(self):
         self.configpath = configpath
         self.backuppath = backuppath
-        self.mb = mysql_backup.Backup()
+        self.mb = mysql_backup.Backup(self.configpath)
 
     def tearDown(self):
         del self.configpath
@@ -45,12 +45,12 @@ class TestBackupMethods(unittest.TestCase):
                       "it should be readable: " + self.configpath)
 
     def test_read_config_creates_dictionary(self):
-        self.mb.read_config(config_location=self.configpath)
+        self.mb.read_config()
         self.assertIsInstance(self.mb.login_info,
                               dict)
 
     def test_read_config_read_default_location(self):
-        self.mb.read_config(config_location=self.configpath)
+        self.mb.read_config()
         login_info = self.mb.login_info
         keys = login_info.keys()
         self.assertTrue("username" in keys)
@@ -58,7 +58,7 @@ class TestBackupMethods(unittest.TestCase):
         self.assertTrue("host" in keys)
 
     def test_read_config_read_nondefault_location(self):
-        self.mb.read_config(config_location=self.configpath)
+        self.mb.read_config()
         login_info = self.mb.login_info
         keys = login_info.keys()
         self.assertTrue("username" in keys)
@@ -66,18 +66,18 @@ class TestBackupMethods(unittest.TestCase):
         self.assertTrue("host" in keys)
 
     def test_get_list_of_databases_returns_a_list(self):
-        self.mb.read_config(config_location=self.configpath)
+        self.mb.read_config()
         login_info = self.mb.login_info
         self.assertIsInstance(self.mb.get_list_of_databases(), list)
 
     def test_get_list_of_databases_not_empty(self):
-        self.mb.read_config(config_location=self.configpath)
+        self.mb.read_config()
         login_info = self.mb.login_info
         list_of_databases = self.mb.get_list_of_databases()
         self.assertTrue(len(list_of_databases) > 0)
 
     def test_get_filename_of_backup_is_string(self):
-        self.mb.read_config(config_location=self.configpath)
+        self.mb.read_config()
         login_info = self.mb.login_info
         list_of_databases = self.mb.get_list_of_databases()
         database = "a"
@@ -87,7 +87,7 @@ class TestBackupMethods(unittest.TestCase):
                                                              filestamp), str)
 
     def test_get_filename_trailing_slash(self):
-        self.mb.read_config(config_location=self.configpath)
+        self.mb.read_config()
         login_info = self.mb.login_info
         list_of_databases = self.mb.get_list_of_databases()
         filestamp = self.mb.filestamp
@@ -104,7 +104,7 @@ class TestBackupMethods(unittest.TestCase):
                           fname_wo_trailing_slash)
 
     def test_backup_databases_creates_file(self):
-        self.mb.read_config(config_location=self.configpath)
+        self.mb.read_config()
         login_info = self.mb.login_info
         list_of_databases = self.mb.get_list_of_databases()
         filestamp = self.mb.filestamp

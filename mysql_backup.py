@@ -6,10 +6,16 @@ import ConfigParser
 import unittest
 
 class Backup():
-    def __init__(self):
-            self.filestamp = None
-            self.login_info = None
-            self.database_list = None
+    def __init__(self,
+                 configpath):
+        """Creates a Backup instance with the configpath that holds the
+        credentials to access mysql. It is generally found under:
+        "/etc/mysql/debian.cnf" on debian based systems including Ubuntu.
+        """
+        self.configpath = configpath
+        self.filestamp = None
+        self.login_info = None
+        self.database_list = None
 
     def set_filestamp(self):
         """Obtains a date stamp for the files from the date.
@@ -17,19 +23,16 @@ class Backup():
         """
         self.filestamp = time.strftime("%Y-%m-%d")
 
-    def read_config(self, config_location="/etc/mysql/debian.cnf"):
-        """Reads the databse config from its location. The default
-        is the place where the config file is found on debian based systems
-        including Ubuntu.
-        @param: config_location is by default "/etc/mysql/debian.cnf"
-        @return a dictionary with "user", "password", "host"
+    def read_config(self):
+        """Reads the databse config from its location.
+        It sets up the login_info dictionary with "user", "password", "host".
         """
         config = ConfigParser.ConfigParser()
         try:
-            os.stat(config_location)
+            os.stat(self.configpath)
         except OSError:
             raise OSError
-        config.read(config_location)
+        config.read(self.configpath)
         login_info = dict()
         login_info["username"] = config.get("client", "user")
         login_info["password"] = config.get("client", "password")
