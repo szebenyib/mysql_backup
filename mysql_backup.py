@@ -102,7 +102,9 @@ class Backup():
 
 def backup():
     config = ConfigParser.ConfigParser()
-    config.read("config.txt")
+    config.read(os.path.dirname(os.path.realpath(__file__))
+                + os.sep
+                + "config.txt")
     configpath = config.get("backup", "configpath")
     backuppath = config.get("backup", "backuppath")
     numbertokeep = config.get("delete", "numbertokeep")
