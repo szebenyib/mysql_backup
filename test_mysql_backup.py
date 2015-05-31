@@ -130,33 +130,33 @@ class TestBackupMethods(unittest.TestCase):
     def test_running_backup(self):
         mysql_backup.backup()
 
-class TestBackupDeletion(unittest.TestCase):
-
-    def setUp(self):
-        self.configpath = configpath
-        self.backuppath = backuppath
-        self.numbertokeep = numbertokeep
-        self.mb = mysql_backup.Backup(self.configpath,
-                                      self.backuppath,
-                                      self.numbertokeep)
-        self.mb.read_config()
-        self.mb.read_list_of_databases()
-        self.mb.backup_databases()
-
-    def tearDown(self):
-        del self.configpath
-        del self.backuppath
-        del self.numbertokeep
-        del self.mb
-
-    def test_delete_old_backups(self):
-        files_list = []
-        for f in os.listdir(self.backuppath):
-            full_path = os.path.join(self.backuppath, f)
-            if os.path.isfile(full_path):
-                files_list.append((full_path,
-                                   os.path.getmtime(full_path)))
-        print files_list
+#class TestBackupDeletion(unittest.TestCase):
+#
+#    def setUp(self):
+#        self.configpath = configpath
+#        self.backuppath = backuppath
+#        self.numbertokeep = numbertokeep
+#        self.mb = mysql_backup.Backup(self.configpath,
+#                                      self.backuppath,
+#                                      self.numbertokeep)
+#        self.mb.read_config()
+#        self.mb.read_list_of_databases()
+#        self.mb.backup_databases()
+#
+#    def tearDown(self):
+#        del self.configpath
+#        del self.backuppath
+#        del self.numbertokeep
+#        del self.mb
+#
+#    def test_delete_old_backups(self):
+#        files_list = []
+#        for f in os.listdir(self.backuppath):
+#            full_path = os.path.join(self.backuppath, f)
+#            if os.path.isfile(full_path):
+#                files_list.append((full_path,
+#                                   os.path.getmtime(full_path)))
+#        print files_list
 
 if __name__ == "main":
     unittest.main()

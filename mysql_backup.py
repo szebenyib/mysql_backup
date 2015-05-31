@@ -113,5 +113,5 @@ def backup():
     mb.read_list_of_databases()
     mb.backup_databases()
 
-if __name__ == "main":
+if __name__ == "__main__":
     backup()
